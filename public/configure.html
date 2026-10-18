@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Watch Import</title>
+    <style>
+      :root {
+        --bg: #f6f6f8;
+        --card: #ffffff;
+        --text: #18181b;
+        --muted: #63636e;
+        --border: #e2e2e8;
+        --accent: #6d4aff;
+        --accent-text: #ffffff;
+        --ok: #157f3d;
+        --error: #c0262d;
+        color-scheme: light;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #111114;
+          --card: #1b1b20;
+          --text: #ececf1;
+          --muted: #9a9aa6;
+          --border: #2c2c34;
+          --accent: #8b6dff;
+          --accent-text: #ffffff;
+          --ok: #4ade80;
+          --error: #f87171;
+          color-scheme: dark;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font:
+          15px/1.5 system-ui,
+          -apple-system,
+          'Segoe UI',
+          sans-serif;
+      }
+      main {
+        max-width: 640px;
+        margin: 0 auto;
+        padding: 40px 16px 64px;
+      }
+      h1 {
+        font-size: 24px;
+        margin: 0 0 6px;
+      }
+      h2 {
+        font-size: 16px;
+        margin: 0 0 12px;
+      }
+      p {
+        margin: 0 0 12px;
+      }
+      .lead,
+      .hint {
+        color: var(--muted);
+      }
+      .hint {
+        font-size: 13px;
+      }
+      section {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 20px;
+        margin-top: 16px;
+      }
+      section[aria-disabled='true'] {
+        opacity: 0.5;
+        pointer-events: none;
+      }
+      .tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      button {
+        font: inherit;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--text);
+        padding: 8px 16px;
+        cursor: pointer;
+      }
+      button.primary {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: var(--accent-text);
+      }
+      button[aria-pressed='true'] {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      button:disabled {
+        opacity: 0.6;
+        cursor: default;
+      }
+      label.field {
+        display: block;
+        margin-bottom: 12px;
+      }
+      input[type='email'],
+      input[type='password'],
+      input[type='text'],
+      select {
+        width: 100%;
+        font: inherit;
+        color: var(--text);
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 9px 12px;
+        margin-top: 4px;
+      }
+      .choice {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 12px 14px;
+        margin-bottom: 10px;
+        cursor: pointer;
+      }
+      .choice:has(input:checked) {
+        border-color: var(--accent);
+      }
+      .choice input {
+        margin-top: 4px;
+        accent-color: var(--accent);
+      }
+      .choice strong {
+        display: block;
+      }
+      .code {
+        font-size: 32px;
+        font-weight: 700;
+        letter-spacing: 6px;
+        margin: 4px 0 8px;
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+      }
+      .row input {
+        margin-top: 0;
+      }
+      .status {
+        min-height: 1.5em;
+        margin: 12px 0 0;
+      }
+      .status.ok {
+        color: var(--ok);
+      }
+      .status.error {
+        color: var(--error);
+      }
+      a {
+        color: var(--accent);
+      }
+      [hidden] {
+        display: none !important;
+      }
+      ol {
+        padding-left: 20px;
+        margin: 12px 0 0;
+      }
+      li {
+        margin-bottom: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Watch Import</h1>
+      <p class="lead">
+        Brings your watch history, Continue Watching and library from Stremio or
+        Nuvio into AIOStreams, and keeps them up to date as you watch there.
+        Nothing is ever written back.
+      </p>
+
+      <section id="service">
+        <h2>1. Choose where your history is</h2>
+        <label class="choice">
+          <input type="radio" name="service" value="stremio" checked />
+          <span><strong>Stremio</strong></span>
+        </label>
+        <label class="choice">
+          <input type="radio" name="service" value="nuvio" />
+          <span><strong>Nuvio</strong></span>
+        </label>
+      </section>
+
+      <section id="signin">
+        <h2>2. Sign in to <span data-service-name>Stremio</span></h2>
+        <div data-for="stremio">
+          <div class="tabs" role="group" aria-label="Sign-in method">
+            <button type="button" data-tab="link" aria-pressed="true">
+              Link code
+            </button>
+            <button type="button" data-tab="password" aria-pressed="false">
+              Email and password
+            </button>
+          </div>
+          <div data-panel="link">
+            <p class="hint">
+              Approve this page from a browser where you are signed in to
+              Stremio. Works for accounts made with Google or Facebook too.
+            </p>
+            <button type="button" class="primary" id="link-start">
+              Get a code
+            </button>
+            <div id="link-code" hidden>
+              <div class="code" id="link-value"></div>
+              <p>
+                Open <a id="link-url" target="_blank" rel="noopener"></a> and
+                approve it.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <form id="password-form" hidden>
+          <label class="field"
+            >Email
+            <input type="email" name="email" autocomplete="username" required
+          /></label>
+          <label class="field"
+            >Password
+            <input
+              type="password"
+              name="password"
+              autocomplete="current-password"
+              required
+          /></label>
+          <p class="hint">
+            Sent straight to <span data-service-name>Stremio</span> from this
+            page. This server never sees it.
+          </p>
+          <button type="submit" class="primary">Sign in</button>
+        </form>
+
+        <label class="field" id="profile-field" hidden
+          >Profile
+          <select id="profile"></select>
+        </label>
+        <p class="status" id="signin-status" role="status"></p>
+      </section>
+
+      <section id="options" aria-disabled="true">
+        <h2>3. Choose what to bring in</h2>
+        <label class="choice">
+          <input type="checkbox" name="library" checked />
+          <span>
+            <strong
+              >The <span data-service-name>Stremio</span> library as
+              favourites</strong
+            >
+            <span class="hint"
+              >Titles in your library become favourites in AIOStreams' apps and
+              Jellyfin clients.</span
+            >
+          </span>
+        </label>
+        <button type="button" class="primary" id="generate">
+          Create addon URL
+        </button>
+      </section>
+
+      <section id="install" hidden>
+        <h2>4. Add it to AIOStreams</h2>
+        <div class="row">
+          <input
+            type="text"
+            id="manifest-url"
+            readonly
+            aria-label="Addon URL"
+          />
+          <button type="button" id="copy">Copy</button>
+        </div>
+        <p class="status" id="preview" role="status"></p>
+        <ol class="hint">
+          <li>
+            In AIOStreams, go to <strong>Addons → Installed</strong>, click
+            <strong>Add by URL</strong> and paste it.
+          </li>
+          <li>
+            AIOStreams reads it in the background, and straight away when an app
+            opens Continue Watching or Next Up.
+          </li>
+          <li>
+            For a one-time import, remove the addon once the Trackers tab shows
+            a successful read. What was imported stays.
+          </li>
+        </ol>
+      </section>
+    </main>
+
+    <script>
+      const STREMIO_API = 'https://api.strem.io/api';
+      const LINK_API = 'https://link.stremio.com/api/v2';
+      const LINK_POLL_MS = 3000;
+      const LINK_TIMEOUT_MS = 5 * 60 * 1000;
+      const NUVIO_API = 'https://api.nuvio.tv';
+      const NUVIO_KEY = 'sb_publishable_1Clq8rlTVACkdcZuqr6_AD__xUUC_EN';
+      const NAMES = { stremio: 'Stremio', nuvio: 'Nuvio' };
+
+      const $ = (id) => document.getElementById(id);
+      let service = 'stremio';
+      let session = null;
+      let linkTimer = null;
+
+      function setStatus(el, text, kind) {
+        el.textContent = text;
+        el.className = 'status' + (kind ? ' ' + kind : '');
+      }
+
+      function showTab(tab) {
+        for (const other of document.querySelectorAll('[data-tab]')) {
+          other.setAttribute('aria-pressed', String(other.dataset.tab === tab));
+        }
+        document.querySelector('[data-panel="link"]').hidden = tab !== 'link';
+        $('password-form').hidden = service === 'stremio' && tab === 'link';
+      }
+
+      function signedOut() {
+        session = null;
+        clearTimeout(linkTimer);
+        $('options').setAttribute('aria-disabled', 'true');
+        $('profile-field').hidden = true;
+        $('link-code').hidden = true;
+        setStatus($('signin-status'), '');
+      }
+
+      function signedIn(value, profiles) {
+        session = value;
+        clearTimeout(linkTimer);
+        if (profiles) {
+          $('profile').replaceChildren(
+            ...profiles.map((p) => new Option(p.name, p.profile_index))
+          );
+          $('profile-field').hidden = profiles.length < 2;
+        }
+        $('options').setAttribute('aria-disabled', 'false');
+        setStatus($('signin-status'), `Signed in to ${NAMES[service]}.`, 'ok');
+      }
+
+      function chooseService(value) {
+        service = value;
+        signedOut();
+        for (const el of document.querySelectorAll('[data-service-name]')) {
+          el.textContent = NAMES[service];
+        }
+        document.querySelector('[data-for="stremio"]').hidden =
+          service !== 'stremio';
+        showTab(service === 'stremio' ? 'link' : 'password');
+        $('install').hidden = true;
+      }
+
+      for (const radio of document.querySelectorAll('input[name="service"]')) {
+        radio.addEventListener('change', () => chooseService(radio.value));
+      }
+      for (const tab of document.querySelectorAll('[data-tab]')) {
+        tab.addEventListener('click', () => showTab(tab.dataset.tab));
+      }
+
+      $('link-start').addEventListener('click', async () => {
+        clearTimeout(linkTimer);
+        setStatus($('signin-status'), '');
+        try {
+          const res = await fetch(`${LINK_API}/create?type=Create`);
+          const { result } = await res.json();
+          if (!result?.code) throw new Error('Stremio did not return a code.');
+          $('link-value').textContent = result.code;
+          $('link-url').href = result.link;
+          $('link-url').textContent = result.link.replace(/^https:\/\//, '');
+          $('link-code').hidden = false;
+          setStatus($('signin-status'), 'Waiting for approval…');
+          const until = Date.now() + LINK_TIMEOUT_MS;
+          const poll = async () => {
+            if (Date.now() > until) {
+              setStatus(
+                $('signin-status'),
+                'The code expired. Get a new one.',
+                'error'
+              );
+              return;
+            }
+            try {
+              const read = await fetch(
+                `${LINK_API}/read?type=Read&code=${encodeURIComponent(result.code)}`
+              ).then((r) => r.json());
+              if (read.result?.authKey) return signedIn(read.result.authKey);
+            } catch {}
+            linkTimer = setTimeout(poll, LINK_POLL_MS);
+          };
+          linkTimer = setTimeout(poll, LINK_POLL_MS);
+        } catch (error) {
+          setStatus($('signin-status'), error.message, 'error');
+        }
+      });
+
+      async function stremioSignIn(email, password) {
+        const res = await fetch(`${STREMIO_API}/login`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            type: 'Auth',
+            email,
+            password,
+            facebook: false,
+          }),
+        });
+        const json = await res.json();
+        if (json.error) {
+          throw new Error(
+            json.error.wrongPass
+              ? 'Wrong password.'
+              : json.error.wrongEmail
+                ? 'No Stremio account uses that email.'
+                : json.error.message || 'Stremio refused the sign-in.'
+          );
+        }
+        if (!json.result?.authKey)
+          throw new Error('Stremio returned no session.');
+        signedIn(json.result.authKey);
+      }
+
+      async function nuvioSignIn(email, password) {
+        const headers = {
+          apikey: NUVIO_KEY,
+          'content-type': 'application/json',
+        };
+        const res = await fetch(
+          `${NUVIO_API}/auth/v1/token?grant_type=password`,
+          { method: 'POST', headers, body: JSON.stringify({ email, password }) }
+        );
+        const json = await res.json();
+        if (!res.ok || !json.refresh_token) {
+          throw new Error(
+            json.msg || json.error_description || 'Nuvio refused the sign-in.'
+          );
+        }
+        const profiles = await fetch(
+          `${NUVIO_API}/rest/v1/rpc/sync_pull_profiles`,
+          {
+            method: 'POST',
+            headers: {
+              ...headers,
+              authorization: `Bearer ${json.access_token}`,
+            },
+            body: '{}',
+          }
+        ).then((r) => r.json());
+        signedIn(
+          json.refresh_token,
+          Array.isArray(profiles) && profiles.length
+            ? profiles
+            : [{ profile_index: 1, name: 'Main' }]
+        );
+      }
+
+      $('password-form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const form = new FormData(event.target);
+        setStatus($('signin-status'), 'Signing in…');
+        try {
+          const signIn = service === 'nuvio' ? nuvioSignIn : stremioSignIn;
+          await signIn(form.get('email'), form.get('password'));
+        } catch (error) {
+          setStatus($('signin-status'), error.message, 'error');
+        }
+      });
+
+      async function showPreview(manifestUrl) {
+        const el = $('preview');
+        setStatus(el, `Reading your ${NAMES[service]} history…`);
+        try {
+          const res = await fetch(
+            manifestUrl.replace(/manifest\.json$/, 'watch_state/pull.json')
+          );
+          const json = await res.json();
+          if (!res.ok) throw new Error(json.error || `HTTP ${res.status}`);
+          const n = (value) => Number(value).toLocaleString();
+          const inProgress = json.items?.length ?? 0;
+          if (!json.watched) {
+            setStatus(
+              el,
+              `${n(inProgress)} in progress so far. Some shows are still being read, so check again in a minute before relying on a one-time import.`
+            );
+            return;
+          }
+          const parts = [
+            `${n(json.watched.movies.length)} watched movies`,
+            `${n(json.watched.episodes.length)} watched episodes`,
+            `${n(inProgress)} in progress`,
+          ];
+          if (json.watchlist)
+            parts.push(`${n(json.watchlist.length)} in your library`);
+          setStatus(el, `Found ${parts.join(', ')}.`, 'ok');
+        } catch (error) {
+          setStatus(el, `Could not read it: ${error.message}`, 'error');
+        }
+      }
+
+      $('generate').addEventListener('click', async () => {
+        const button = $('generate');
+        button.disabled = true;
+        try {
+          const library = document.querySelector(
+            'input[name="library"]'
+          ).checked;
+          const body =
+            service === 'nuvio'
+              ? {
+                  service,
+                  refreshToken: session,
+                  profile: Number($('profile').value || 1),
+                  library,
+                }
+              : { service, authKey: session, library };
+          const res = await fetch('/configure', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify(body),
+          });
+          const json = await res.json();
+          if (!res.ok) throw new Error(json.error || `HTTP ${res.status}`);
+          $('manifest-url').value = json.manifestUrl;
+          $('install').hidden = false;
+          // The server now holds this sign-in, so another link needs a fresh one.
+          if (service === 'nuvio') {
+            signedOut();
+            setStatus(
+              $('signin-status'),
+              'Link made. Sign in again to make another one.',
+              'ok'
+            );
+          }
+          showPreview(json.manifestUrl);
+        } catch (error) {
+          setStatus($('signin-status'), error.message, 'error');
+        } finally {
+          button.disabled = false;
+        }
+      });
+
+      $('copy').addEventListener('click', async () => {
+        const input = $('manifest-url');
+        try {
+          await navigator.clipboard.writeText(input.value);
+        } catch {
+          input.select();
+          document.execCommand('copy');
+        }
+        $('copy').textContent = 'Copied';
+        setTimeout(() => ($('copy').textContent = 'Copy'), 1500);
+      });
+
+      chooseService('stremio');
+    </script>
+  </body>
+</html>

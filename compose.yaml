@@ -1,0 +1,11 @@
+services:
+  watch-import:
+    image: ghcr.io/viren070/watch-import:latest
+    init: true
+    restart: unless-stopped
+    ports:
+      - 7007:7007
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data

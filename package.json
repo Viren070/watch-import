@@ -1,0 +1,35 @@
+{
+  "name": "watch-import",
+  "version": "0.1.0",
+  "private": true,
+  "description": "An AIOStreams addon that brings watch history, Continue Watching and the library from Stremio or Nuvio into AIOStreams.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Viren070/watch-import.git"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "packageManager": "pnpm@11.0.8",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server.js",
+    "dev": "tsx watch src/server.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "format": "prettier --write \"src/**/*.ts\" \"public/**/*.html\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"public/**/*.html\""
+  },
+  "dependencies": {
+    "@aiostreams/addon-sdk": "^0.1.0",
+    "undici": "^7.30.1",
+    "zod": "^4.6.6"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "prettier": "^3.9.10",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3"
+  }
+}
